@@ -1,0 +1,63 @@
+<!-- login.html -->
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>دخول المحرر — المكتب الإعلامي المركزي</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* Small overrides for login-only page */
+    body{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(180deg,#050506,#0a0a0b)}
+    .login-card{width:100%;max-width:420px;padding:22px;border-radius:12px;background:rgba(12,12,12,0.95);border:1px solid rgba(255,255,255,0.03);box-shadow:0 10px 30px rgba(0,0,0,0.6)}
+    .login-card h2{color:white;margin:0 0 6px}
+    .login-card p{margin:0 0 16px;color:rgba(255,255,255,0.7)}
+    input[type="password"], input[type="text"]{width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--muted);margin-bottom:12px}
+    .hint{font-size:13px;color:rgba(255,255,255,0.6)}
+    .center{display:flex;gap:10px;justify-content:center;margin-top:8px}
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <h2>دخول محرر</h2>
+    <p class="hint">أدخل بيانات الدخول للمحرر للوصول إلى أدوات التحرير.</p>
+
+    <form id="loginForm">
+      <label>اسم المستخدم
+        <input id="username" type="text" placeholder="admin" required>
+      </label>
+      <label>كلمة المرور
+        <input id="password" type="password" placeholder="********" required>
+      </label>
+
+      <div class="center">
+        <button class="btn primary" type="submit">تسجيل الدخول</button>
+        <a href="index.html" class="btn ghost">العودة للصفحة</a>
+      </div>
+    </form>
+
+    <p style="margin-top:14px;font-size:13px;color:rgba(255,255,255,0.6)">ملاحظة: هذه نسخة محلية للتجربة — استبدل نظام المصادقة بنظام آمن على الخادم للإنتاج.</p>
+  </div>
+
+  <script>
+    // Simple client-side login — replace with real auth in production.
+    const loginForm = document.getElementById('loginForm');
+    loginForm.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      // Default credentials for demo: admin / media2025
+      if(username === 'admin' && password === 'media2025'){
+        // Set session token and redirect back with editor flag
+        localStorage.setItem('mac_editor_auth','1');
+        // Pass quick param to ensure index picks it up
+        window.location.href = 'index.html?editor=1';
+      } else {
+        alert('بيانات غير صحيحة. للاختبار: user=admin / pass=media2025');
+      }
+    });
+  </script>
+</body>
+</html>
