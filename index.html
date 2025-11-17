@@ -1,86 +1,304 @@
-<!-- index.html -->
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>المكتب الإعلامي المركزي — الخطة الشهرية</title>
+  <title>المكتب الإعلامي المركزي — لوحة المهام الشهرية</title>
+  <meta name="description" content="لوحة المهام الشهرية للمكتب الإعلامي المركزي — عرض احترافي، لودر سينمائي، أنيميشن، ويدعم جميع الشاشات." />
 
-  <!-- Google Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="style.css">
+  <style>
+    :root{
+      --bg:#ffffff; --card:#fffdfb;
+      --red:#c62828; --red-dark:#9b1f1f; --gold:#d4af37; --muted:#6b6b6b;
+      --shadow:0 12px 40px rgba(8,8,10,0.06); --radius:14px; --maxw:1400px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:'Tajawal',system-ui;direction:rtl;background:linear-gradient(180deg,#fff #fffaf6);color:#111;-webkit-font-smoothing:antialiased}
+    a{color:inherit;text-decoration:none}
+    button{font-family:inherit;cursor:pointer}
+
+    /* Loader */
+    .loader-wrap{position:fixed;inset:0;display:grid;place-items:center;background:linear-gradient(180deg,rgba(255,255,255,0.98),rgba(255,250,245,0.98));z-index:9999;transition:opacity .6s,visibility .6s}
+    .loader-wrap.hidden{opacity:0;visibility:hidden;pointer-events:none}
+    .loader-card{width:260px;height:260px;border-radius:20px;display:grid;place-items:center;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.12);background:linear-gradient(135deg,rgba(212,175,55,0.06),rgba(198,40,40,0.02))}
+    .ring{position:absolute;border-radius:50%;border:6px solid transparent;animation:spin 6s linear infinite}
+    .r1{width:260px;height:260px;border-image:linear-gradient(90deg,var(--gold),var(--red)) 1}
+    .r2{width:190px;height:190px;border:4px solid rgba(0,0,0,0.04);animation-duration:4.2s}
+    .r3{width:120px;height:120px;border:3px dashed rgba(0,0,0,0.04);animation-duration:5s}
+    @keyframes spin{100%{transform:rotate(360deg)}}
+    .loader-logo{width:110px;height:110px;border-radius:14px;background:linear-gradient(135deg,var(--red),var(--gold));display:grid;place-items:center;color:white;font-weight:900;font-size:20px;box-shadow:0 12px 30px rgba(198,40,40,0.18)}
+    .loader-percent{margin-top:12px;font-weight:700;color:var(--muted)}
+
+    /* Page */
+    .wrap{max-width:var(--maxw);margin:18px auto;padding:18px;display:flex;flex-direction:column;gap:18px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px;border-radius:14px;background:linear-gradient(90deg, rgba(212,175,55,0.05), rgba(198,40,40,0.03));box-shadow:var(--shadow)}
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo-square{width:72px;height:72px;border-radius:12px;background:linear-gradient(135deg,var(--red),var(--gold));display:grid;place-items:center;color:white;font-weight:900}
+    .brand h1{margin:0;font-size:18px;color:var(--red)}
+    .brand p{margin:0;color:var(--muted);font-size:13px}
+
+    .actions{display:flex;gap:10px;align-items:center}
+    .btn{padding:10px 14px;border-radius:10px;border:0;font-weight:700}
+    .btn.primary{background:linear-gradient(90deg,var(--red),var(--red-dark));color:#fff;box-shadow:0 12px 36px rgba(198,40,40,0.12)}
+    .btn.ghost{background:transparent;border:2px solid var(--gold);color:var(--gold)}
+    .btn.link{background:transparent;color:var(--red);font-weight:800}
+
+    /* Hero */
+    .hero{display:grid;grid-template-columns:1fr 360px;gap:18px;align-items:center}
+    .card{background:var(--card);padding:18px;border-radius:14px;box-shadow:var(--shadow)}
+    .hero h2{margin:0 0 8px 0;font-size:26px}
+    .hero p{margin:0;color:var(--muted)}
+    .stat{display:flex;flex-direction:column;align-items:center;height:140px;border-radius:12px;padding:12px}
+    .stat .num{font-size:36px;font-weight:900;color:var(--red)}
+
+    /* Timeline */
+    .timeline{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:6px}
+    .month-card{background:linear-gradient(180deg,#fff,#fffaf6);border-radius:16px;padding:14px;box-shadow:var(--shadow);min-height:220px;position:relative;overflow:hidden;transition:transform .32s,box-shadow .32s}
+    .month-card:hover{transform:translateY(-8px)}
+    .month-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+    .month-head h3{margin:0;color:var(--red);font-size:18px}
+    .progress-bar{height:8px;border-radius:999px;background:linear-gradient(90deg,var(--gold),var(--red));width:34%}
+
+    .tasks{display:flex;flex-direction:column;gap:10px;max-height:calc(100% - 72px);overflow:auto;padding-inline-start:6px}
+    .task{display:flex;gap:12px;align-items:center;padding:10px;border-radius:12px;background:linear-gradient(180deg,rgba(0,0,0,0.02),transparent);transition:transform .22s,box-shadow .22s}
+    .task:hover{transform:translateY(-4px);box-shadow:0 12px 30px rgba(0,0,0,0.06)}
+    .icon{width:50px;height:50px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(180deg,var(--red),var(--red-dark));color:#fff;font-weight:900;flex-shrink:0}
+    .meta{flex:1;min-width:0}
+    .meta h4{margin:0;font-size:15px}
+    .meta p{margin:6px 0 0 0;color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .meta .remaining{margin-top:8px;display:inline-block;padding:6px 8px;border-radius:999px;background:rgba(0,0,0,0.04);font-weight:700;color:var(--muted);font-size:12px}
+    .date{min-width:110px;text-align:center;font-size:12px;color:var(--muted)}
+
+    .empty{padding:18px;border-radius:10px;background:linear-gradient(180deg,rgba(0,0,0,0.02),transparent);text-align:center;color:var(--muted)}
+
+    /* shimmer gold */
+    .shimmer{position:relative;overflow:hidden}
+    .shimmer::after{content:"";position:absolute;left:-120%;top:0;width:120%;height:100%;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,0.14),rgba(255,255,255,0));transform:skewX(-12deg);animation:shimmer 4s linear infinite;mix-blend-mode:overlay}
+    @keyframes shimmer{100%{left:120%}}
+
+    /* reveal */
+    .reveal{opacity:0;transform:translateY(20px) scale(.995);transition:opacity .6s,transform .6s}
+    .reveal.in{opacity:1;transform:none}
+
+    /* responsive */
+    @media (max-width:1100px){ .timeline{grid-template-columns:repeat(2,1fr)} .hero{grid-template-columns:1fr 300px} }
+    @media (max-width:800px){
+      header{flex-direction:column;align-items:flex-start}
+      .hero{grid-template-columns:1fr}
+      .timeline{display:none}
+      .timeline-scroll{display:flex;gap:16px;overflow:auto;padding-bottom:12px;margin-top:12px}
+      .timeline-scroll .month-card{min-width:320px;flex:0 0 320px}
+    }
+    footer{margin-top:6px;text-align:center;color:var(--muted);font-size:13px}
+  </style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="logo-row">
-      <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24' fill='none' stroke='%23b8860b' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='3' width='18' height='18' rx='3' /><path d='M8 14h8M8 10h8'/></svg>" alt="logo" class="logo">
-      <div class="title">
-        <div class="main-title">المكتب الإعلامي المركزي</div>
-        <div class="subtitle">خطة شهرية — جدول ومهام قابلة للتحرير</div>
+  <!-- Loader -->
+  <div class="loader-wrap" id="loader">
+    <div class="loader-card" role="status" aria-live="polite" aria-label="جارٍ التحميل">
+      <div class="ring r1" aria-hidden="true"></div>
+      <div class="ring r2" aria-hidden="true"></div>
+      <div class="ring r3" aria-hidden="true"></div>
+
+      <div style="text-align:center;z-index:2">
+        <div class="loader-logo">يتم التحميل</div>
+        <div class="loader-percent" id="loaderPercent">0%</div>
       </div>
-    </div>
-
-    <nav class="actions">
-      <a href="login.html" id="loginBtn" class="btn ghost">دخول المحرر</a>
-      <button id="logoutBtn" class="btn ghost" style="display:none">تسجيل الخروج</button>
-    </nav>
-  </header>
-
-  <main class="container">
-    <section class="hero">
-      <h1>الخطة الشهرية للتواصل والأنشطة</h1>
-      <p class="lead">عرض واضح، عدّاد توقيت لكل مهمة، وتحكم كامل للمحرر.</p>
-    </section>
-
-    <section class="timeline-section" aria-label="الخطة الشهرية">
-      <div class="editor-hint" id="editorHint" style="display:none">
-        <button class="btn primary" id="addTaskBtn">+ إضافة مهمة</button>
-      </div>
-
-      <div class="timeline-wrapper" id="timelineWrapper">
-        <!-- Months render here by JS -->
-      </div>
-    </section>
-  </main>
-
-  <footer class="site-footer">
-    <a href="https://press-office-2025.netlify.app/" class="footer-btn" target="_blank" rel="noopener noreferrer">تعرف أكثر عن المكتب</a>
-    <div class="footer-note">© <span id="year"></span> المكتب الإعلامي المركزي</div>
-  </footer>
-
-  <!-- Task Modal -->
-  <div id="taskModal" class="modal" aria-hidden="true">
-    <div class="modal-card">
-      <button class="modal-close" id="closeModal" aria-label="إغلاق">&times;</button>
-      <h3 id="modalTitle">إضافة مهمة</h3>
-      <form id="taskForm">
-        <label>الشهر
-          <select id="taskMonth" required>
-            <option value="0">يناير</option><option value="1">فبراير</option><option value="2">مارس</option>
-            <option value="3">أبريل</option><option value="4">مايو</option><option value="5">يونيو</option>
-            <option value="6">يوليو</option><option value="7">أغسطس</option><option value="8">سبتمبر</option>
-            <option value="9">أكتوبر</option><option value="10">نوفمبر</option><option value="11">ديسمبر</option>
-          </select>
-        </label>
-        <label>عنوان المهمة
-          <input id="taskTitle" type="text" placeholder="مثال: نشر تقرير الأسبوع" required>
-        </label>
-        <label>الوصف
-          <textarea id="taskDesc" rows="3" placeholder="تفاصيل المهمة"></textarea>
-        </label>
-        <label>تاريخ الاستحقاق
-          <input id="taskDate" type="datetime-local" required>
-        </label>
-
-        <div class="modal-actions">
-          <button type="submit" class="btn primary" id="saveTaskBtn">حفظ</button>
-          <button type="button" class="btn ghost" id="cancelTaskBtn">إلغاء</button>
-        </div>
-      </form>
     </div>
   </div>
 
-  <script src="script.js" defer></script>
+  <!-- App -->
+  <div class="wrap" id="app" aria-hidden="true">
+    <header class="reveal">
+      <div class="brand">
+        <div class="logo-square">المكتب الإعلامي</div>
+        <div>
+          <h1>المكتب الإعلامي المركزي</h1>
+          <p>لوحة المهام الشهرية — عرض ثابت وتحديث من الكود فقط</p>
+        </div>
+      </div>
+
+      <div class="actions">
+        <!-- CHANGE the MORE_LINK constant in the script section to point this button -->
+        <a class="btn link" id="moreLinkBtn" href="#" target="_blank" rel="noopener noreferrer">تعرف أكثر عن المكتب</a>
+        <button class="btn ghost" onclick="window.print()">طباعة</button>
+      </div>
+    </header>
+
+    <section class="hero reveal">
+      <div class="card">
+        <h2>لوحة توزيع المهام — عرض شهري احترافي</h2>
+        <p>تعرض المهام الشهرية مع الديدلاين — المهام المنتهية تُخفي تلقائياً. عدّل الشهور والتاسكات من داخل ملف الـ HTML في مصفوفة <code>tasksByMonth</code>.</p>
+        <div style="height:12px"></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <div style="background:rgba(0,0,0,0.04);padding:8px 12px;border-radius:999px;font-weight:800">مهام نشطة: <span id="activeCount" style="margin-inline-start:8px;font-weight:900;color:var(--red)">0</span></div>
+          <div style="background:rgba(0,0,0,0.04);padding:8px 12px;border-radius:999px">إجمالي مهام: <span id="totalCount" style="margin-inline-start:8px;font-weight:900">0</span></div>
+        </div>
+      </div>
+
+      <aside class="card stat shimmer" aria-hidden="true">
+        <div class="num" id="todayCount" style="font-size:34px;font-weight:900;color:var(--red)">0</div>
+        <small style="color:var(--muted)">مهام نشطة حتى اليوم</small>
+      </aside>
+    </section>
+
+    <main>
+      <h2 style="margin:8px 0 6px 0">الخط الزمني للأشهر</h2>
+      <section id="timelineGrid" class="timeline" aria-live="polite"></section>
+      <section id="timelineScroll" class="timeline-scroll" style="display:none"></section>
+    </main>
+
+    <footer>© <span id="year"></span> المكتب الإعلامي المركزي</footer>
+  </div>
+
+  <script>
+    /* ========== CONFIG ========== */
+    // ضع هنا رابط زر "تعرف أكثر" (مثّل برابط موقعك)
+    const MORE_LINK = 'https://your-link-here.com'; // <-- عدّله هنا إلى اللينك الفعلي
+
+    // مصفوفة ثابتة (12 شهراً) — عدّل المحتوى هنا فقط؛ لا توجد واجهة لإضافة/تعديل
+    const tasksByMonth = [
+      { key:'nov', title:'نوفمبر', tasks:[
+        { id:'t-nov-1', title:'تحديث قائمة الصحفيين', desc:'إضافة اتصالات جديدة.', deadline:'2025-11-26', icon:'ق' },
+        { id:'t-nov-1', title:'تحديث قائمة الصحفيين', desc:'إضافة اتصالات جديدة.', deadline:'2025-11-26', icon:'ق' },
+        { id:'t-nov-1', title:'تحديث قائمة الصحفيين', desc:'إضافة اتصالات جديدة.', deadline:'2025-11-26', icon:'ق' }
+      ]},
+      { key:'dec', title:'ديسمبر', tasks:[
+        { id:'t-dec-1', title:'خطة 2026', desc:'اجتماع لإغلاق خطة العام القادم.', deadline:'2025-12-20', icon:'خ' }
+      ]}
+    ];
+
+    /* ========== helpers ========== */
+    const today = new Date();
+    function isoToDate(iso){
+      if(!iso) return null;
+      const [y,m,d]=iso.split('-').map(Number);
+      return new Date(y, (m||1)-1, d||1, 23,59,59);
+    }
+    function isActive(deadlineIso){
+      const d=isoToDate(deadlineIso);
+      return d && d >= new Date(today.getFullYear(), today.getMonth(), today.getDate(),0,0,0);
+    }
+    function formatDate(iso){ const d=isoToDate(iso); if(!d) return ''; return d.toLocaleDateString('ar-EG',{year:'numeric',month:'short',day:'numeric'}); }
+    function daysLeft(iso){ const d=isoToDate(iso); if(!d) return ''; const diff=Math.ceil((d - new Date())/(1000*60*60*24)); if(diff<0) return 'منتهية'; if(diff===0) return 'اليوم'; return diff+' يوم'; }
+
+    /* ========== DOM refs ========== */
+    const timelineGrid = document.getElementById('timelineGrid');
+    const timelineScroll = document.getElementById('timelineScroll');
+    const activeCountEl = document.getElementById('activeCount');
+    const totalCountEl = document.getElementById('totalCount');
+    const todayCountEl = document.getElementById('todayCount');
+    const yearEl = document.getElementById('year');
+    const moreLinkBtn = document.getElementById('moreLinkBtn');
+
+    yearEl.textContent = new Date().getFullYear();
+    moreLinkBtn.href = MORE_LINK;
+
+    /* ========== render logic (عرض ثابت — لا اضافة من الواجهة) ========== */
+    function renderAll(){
+      timelineGrid.innerHTML = '';
+      timelineScroll.innerHTML = '';
+      let total=0, active=0, todayActive=0;
+
+      tasksByMonth.forEach(month=>{
+        total += (month.tasks || []).length;
+        const activeTasks = (month.tasks || []).filter(t => isActive(t.deadline));
+        active += activeTasks.length;
+        // count tasks active today (deadline >= today)
+        todayActive += activeTasks.filter(t => isoToDate(t.deadline) >= new Date()).length;
+
+        const card = buildMonthCard(month, activeTasks);
+        timelineGrid.appendChild(card.cloneNode(true));
+        timelineScroll.appendChild(card);
+      });
+
+      activeCountEl.textContent = active;
+      totalCountEl.textContent = total;
+      todayCountEl.textContent = active;
+      // reveal observer
+      setupReveal();
+      // responsive toggle
+      handleResponsive();
+    }
+
+    function buildMonthCard(month, activeTasks){
+      const card = document.createElement('article');
+      card.className = 'month-card reveal';
+      card.dataset.key = month.key;
+
+      const head = document.createElement('div'); head.className='month-head';
+      const h3 = document.createElement('h3'); h3.textContent = month.title;
+      const pb = document.createElement('div'); pb.className='progress-bar';
+      head.appendChild(h3); head.appendChild(pb);
+      card.appendChild(head);
+
+      const tasksWrap = document.createElement('div'); tasksWrap.className='tasks';
+
+      if(activeTasks.length === 0){
+        const e = document.createElement('div'); e.className='empty'; e.textContent='لا توجد مهام نشطة لهذا الشهر';
+        tasksWrap.appendChild(e);
+      } else {
+        activeTasks.forEach(t=>{
+          const item = document.createElement('div'); item.className='task';
+          const ic = document.createElement('div'); ic.className='icon'; ic.textContent = t.icon || 'م';
+          const meta = document.createElement('div'); meta.className='meta';
+          const ttl = document.createElement('h4'); ttl.textContent = t.title;
+          const desc = document.createElement('p'); desc.textContent = t.desc || '';
+          const rem = document.createElement('div'); rem.className='remaining'; rem.textContent = daysLeft(t.deadline);
+          meta.appendChild(ttl); meta.appendChild(desc); meta.appendChild(rem);
+          const date = document.createElement('div'); date.className='date'; date.textContent = formatDate(t.deadline);
+          item.appendChild(ic); item.appendChild(meta); item.appendChild(date);
+          tasksWrap.appendChild(item);
+        });
+      }
+      card.appendChild(tasksWrap);
+      return card;
+    }
+
+    /* ========== reveal animation (IntersectionObserver) ========== */
+    function setupReveal(){
+      const obs = new IntersectionObserver((entries)=>{
+        entries.forEach(en=>{
+          if(en.isIntersecting){ en.target.classList.add('in'); }
+        });
+      }, {threshold:0.08});
+      document.querySelectorAll('.reveal').forEach(el=>{ el.classList.remove('in'); obs.observe(el); });
+    }
+
+    /* ========== responsive timeline switch ========== */
+    function handleResponsive(){
+      if(window.innerWidth <= 800){
+        timelineGrid.style.display='none';
+        timelineScroll.style.display='flex';
+      } else {
+        timelineGrid.style.display='grid';
+        timelineScroll.style.display='none';
+      }
+    }
+    window.addEventListener('resize', handleResponsive);
+
+    /* ========== loader simulation then init ========== */
+    const loader = document.getElementById('loader');
+    const loaderPercent = document.getElementById('loaderPercent');
+    function startLoaderThenInit(){
+      let p = 0;
+      const t = setInterval(()=>{
+        p += Math.random()*15;
+        if(p >= 100) p = 100;
+        loaderPercent.textContent = Math.floor(p) + '%';
+        if(p === 100){
+          clearInterval(t);
+          setTimeout(()=>{ loader.classList.add('hidden'); document.getElementById('app').removeAttribute('aria-hidden'); renderAll(); }, 420);
+        }
+      }, 220);
+    }
+    window.addEventListener('load', startLoaderThenInit);
+
+    /* rerender each minute to auto-hide expired tasks */
+    setInterval(renderAll, 60*1000);
+  </script>
 </body>
 </html>
