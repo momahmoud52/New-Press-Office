@@ -151,3 +151,8 @@ input[type="text"], textarea, select, input[type="datetime-local"]{
   .month-card{padding:10px;border-radius:10px}
   .task{padding:10px}
 }
+
+.checkbox.disabled {
+  cursor: not-allowed !important;
+  opacity: 0.45 !important;
+}

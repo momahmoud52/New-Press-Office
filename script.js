@@ -155,12 +155,15 @@ function render(){
   });
 
   // attach checkbox handlers
-  document.querySelectorAll('.checkbox').forEach(cb=>{
-    cb.addEventListener('click', (e)=>{
+ document.querySelectorAll('.checkbox').forEach(cb=>{
+  if(!cb.classList.contains('disabled')){
+    cb.addEventListener('click', ()=>{
       const m = parseInt(cb.dataset.month,10), idx=parseInt(cb.dataset.idx,10);
       toggleComplete(m, idx, cb);
-    })
-  });
+    });
+  }
+});
+
 }
 
 // Escape helper (very small) to avoid accidental HTML injection on titles/descriptions
