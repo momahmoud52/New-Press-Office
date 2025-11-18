@@ -184,42 +184,56 @@
   </div>
 
   <script>
-    /* ========== CONFIG ========== */
-    // ضع هنا رابط زر "تعرف أكثر" (مثّل برابط موقعك)
-    const MORE_LINK = 'https://press-office-2025.netlify.app/'; // <-- عدّله هنا إلى اللينك الفعلي
+   /* ========== CONFIG ========== */
+// ضع هنا رابط زر "تعرف أكثر"
+const MORE_LINK = 'https://press-office-2025.netlify.app/';
 
-    // مصفوفة ثابتة (12 شهراً) — عدّل المحتوى هنا فقط؛ لا توجد واجهة لإضافة/تعديل
-    const tasksByMonth = [
-      { key:'nov', title:'نوفمبر', tasks:[
-        { id:'t-nov-1', title:'اليوم العالمي للتوعية بالمضادات الحيوية', desc:'تصميم توعوي عن المضادات الحيوية ', deadline:'2025-11-18', icon:'💊' },
-        { id:'t-nov-1', title:"اليوم العالمي للطفل", desc:'تصميم بهوية الاتحاد', deadline:'2025-11-19', icon:"😊" },
-        { id:'t-nov-1', title:'تصميم يوم الجمعة', desc:'تصميم اسلامي يعكس هوية الاتحاد', deadline:'2025-11-20', icon:'🕌' },
-        { id:'t-nov-1', title:'اليوم العالمي للقضاء علي العنف ضد المرأة', desc:'منشور توعوي', deadline:'2025-11-25', icon:'🚺' },
-        { id:'t-nov-1', title:"اليوم العالمي للتضامن مع فلسطين", desc:"تصميم عربي بهوية عربية", deadline:'2025-11-29', icon:'🤝' }
+// مصفوفة الشهور — عدّل المهام فقط
+const tasksByMonth = [
+  { key:'nov', title:'نوفمبر', tasks:[
+    { id:'t-nov-1', title:'اليوم العالمي للتوعية بالمضادات الحيوية', desc:'تصميم توعوي عن المضادات الحيوية ', deadline:'2025-11-18', icon:'💊' },
+    { id:'t-nov-1', title:"اليوم العالمي للطفل", desc:'تصميم بهوية الاتحاد', deadline:'2025-11-19', icon:"😊" },
+    { id:'t-nov-1', title:'تصميم يوم الجمعة', desc:'تصميم اسلامي يعكس هوية الاتحاد', deadline:'2025-11-20', icon:'🕌' },
+    { id:'t-nov-1', title:'اليوم العالمي للقضاء علي العنف ضد المرأة', desc:'منشور توعوي', deadline:'2025-11-25', icon:'🚺' },
+    { id:'t-nov-1', title:"اليوم العالمي للتضامن مع فلسطين", desc:"تصميم عربي بهوية عربية", deadline:'2025-11-29', icon:'🤝' },
+  ]},
+  { key:'dec', title:'ديسمبر', tasks:[
+    { id:'t-dec-1', title:'اجتماع المكتب الإعلامي المركزي', desc:"اجتماع البورد والاعضاء وعرض الخطط", deadline:'2025-12-01', icon:'🧑‍🤝‍🧑' },
+  ]}
+];
 
+/* ========== helpers (معدلة بالكامل لضبط الوقت) ========== */
 
-      ]},
-      { key:'dec', title:'ديسمبر', tasks:[
-        { id:'t-dec-1', title:'اجتماع المكتب الإعلامي المركزي', desc:"اجتماع البورد والاعضاء وعرض الخطط", deadline:'2025-12-01', icon:'🧑‍🤝‍🧑' }
-      ]}
-      
-    ];
-
-    /* ========== helpers ========== */
-    const today = new Date();
-   function isoToDate(iso){
+// تحويل نص التاريخ إلى كائن تاريخ
+function isoToDate(iso){
   if(!iso) return null;
-  // يدعم: YYYY-MM-DD HH:MM
-  if(iso.includes(' ')){
-    const [datePart, timePart] = iso.split(' ');
-    return new Date(datePart + 'T' + timePart + ':00');
+
+  // إذا التاريخ يحتوي وقت "YYYY-MM-DD HH:MM"
+  if (iso.includes(" ")) {
+    const [d, t] = iso.split(" ");
+    const full = new Date(`${d}T${t}:00`);
+    return isNaN(full) ? null : full;
   }
-  return new Date(iso);
-    }
-    function isActive(deadlineIso){
-      const d=isoToDate(deadlineIso);
-      return d && d >= new Date(today.getFullYear(), today.getMonth(), today.getDate(),0,0,0);
-    }
+
+  // إذا التاريخ بدون وقت → نحسبه نهاية اليوم 23:59:59
+  if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
+    const [y, m, day] = iso.split("-").map(Number);
+    const d = new Date(y, m - 1, day, 23, 59, 59);
+    return isNaN(d) ? null : d;
+  }
+
+  const d = new Date(iso);
+  return isNaN(d) ? null : d;
+}
+
+// المهمة نشطة؟ تعتمد على الوقت الحقيقي الآن
+function isActive(deadlineIso){
+  const d = isoToDate(deadlineIso);
+  if (!d) return false;
+  return d.getTime() >= Date.now();
+}
+
+// عرض التاريخ بشكل جميل
 function formatDate(iso){
   const d = isoToDate(iso);
   if (!d) return '';
@@ -231,145 +245,188 @@ function formatDate(iso){
     minute:'2-digit'
   });
 }
+
+// حساب الوقت المتبقي بدقة
 function daysLeft(iso){
   const d = isoToDate(iso);
   if (!d) return '';
 
   const now = new Date();
-  const diffMs = d - now;
+  const diff = d - now;
 
-  if (diffMs < 0) return 'منتهية';
+  if (diff < 0) return "منتهية";
 
-  const diffMinutes = Math.floor(diffMs / (1000 * 60));
-  const diffHours   = Math.floor(diffMinutes / 60);
-  const diffDays    = Math.floor(diffHours / 24);
+  const minutes = Math.floor(diff / 60000);
+  const hours   = Math.floor(minutes / 60);
+  const days    = Math.floor(hours / 24);
 
-  const hoursLeft   = diffHours % 24;
-  const minsLeft    = diffMinutes % 60;
+  const hLeft = hours % 24;
+  const mLeft = minutes % 60;
 
-  if (diffDays === 0 && diffHours === 0 && diffMinutes >= 0) {
-    return `متبقي ${minsLeft} دقيقة`;
-  }
-  if (diffDays === 0) {
-    return `متبقي ${hoursLeft} ساعة و ${minsLeft} دقيقة`;
-  }
-  return `متبقي ${diffDays} يوم و ${hoursLeft} ساعة`;
+  if (days === 0 && hours === 0) return `متبقي ${mLeft} دقيقة`;
+  if (days === 0) return `متبقي ${hLeft} ساعة و ${mLeft} دقيقة`;
+  return `متبقي ${days} يوم و ${hLeft} ساعة`;
 }
 
-    /* ========== DOM refs ========== */
-    const timelineGrid = document.getElementById('timelineGrid');
-    const timelineScroll = document.getElementById('timelineScroll');
-    const activeCountEl = document.getElementById('activeCount');
-    const totalCountEl = document.getElementById('totalCount');
-    const todayCountEl = document.getElementById('todayCount');
-    const yearEl = document.getElementById('year');
-    const moreLinkBtn = document.getElementById('moreLinkBtn');
+/* ========== DOM refs ========== */
+const timelineGrid = document.getElementById('timelineGrid');
+const timelineScroll = document.getElementById('timelineScroll');
+const activeCountEl = document.getElementById('activeCount');
+const totalCountEl = document.getElementById('totalCount');
+const todayCountEl = document.getElementById('todayCount');
+const yearEl = document.getElementById('year');
+const moreLinkBtn = document.getElementById('moreLinkBtn');
 
-    yearEl.textContent = new Date().getFullYear();
-    moreLinkBtn.href = MORE_LINK;
+yearEl.textContent = new Date().getFullYear();
+moreLinkBtn.href = MORE_LINK;
 
-    /* ========== render logic (عرض ثابت — لا اضافة من الواجهة) ========== */
-    function renderAll(){
-      timelineGrid.innerHTML = '';
-      timelineScroll.innerHTML = '';
-      let total=0, active=0, todayActive=0;
+/* ========== render logic ========== */
+function renderAll(){
+  timelineGrid.innerHTML = '';
+  timelineScroll.innerHTML = '';
+  let total = 0, active = 0;
 
-      tasksByMonth.forEach(month=>{
-        total += (month.tasks || []).length;
-        const activeTasks = (month.tasks || []).filter(t => isActive(t.deadline));
-        active += activeTasks.length;
-        // count tasks active today (deadline >= today)
-        todayActive += activeTasks.filter(t => isoToDate(t.deadline) >= new Date()).length;
+  tasksByMonth.forEach(month=>{
+    total += month.tasks.length;
 
-        const card = buildMonthCard(month, activeTasks);
-        timelineGrid.appendChild(card.cloneNode(true));
-        timelineScroll.appendChild(card);
-      });
+    // المهام النشطة فقط
+    const activeTasks = month.tasks.filter(t => isActive(t.deadline));
 
-      activeCountEl.textContent = active;
-      totalCountEl.textContent = total;
-      todayCountEl.textContent = active;
-      // reveal observer
-      setupReveal();
-      // responsive toggle
-      handleResponsive();
+    active += activeTasks.length;
+
+    const card = buildMonthCard(month, activeTasks);
+
+    timelineGrid.appendChild(card.cloneNode(true));
+    timelineScroll.appendChild(card);
+  });
+
+  activeCountEl.textContent = active;
+  totalCountEl.textContent = total;
+  todayCountEl.textContent = active;
+
+  setupReveal();
+  handleResponsive();
+}
+
+function buildMonthCard(month, activeTasks){
+  const card = document.createElement('article');
+  card.className = 'month-card reveal';
+
+  const head = document.createElement('div');
+  head.className = 'month-head';
+
+  const h3 = document.createElement('h3');
+  h3.textContent = month.title;
+
+  const pb = document.createElement('div');
+  pb.className = 'progress-bar';
+
+  head.appendChild(h3);
+  head.appendChild(pb);
+  card.appendChild(head);
+
+  const tasksWrap = document.createElement('div');
+  tasksWrap.className = 'tasks';
+
+  if(activeTasks.length === 0){
+    const e = document.createElement('div');
+    e.className = 'empty';
+    e.textContent = 'لا توجد مهام نشطة لهذا الشهر';
+    tasksWrap.appendChild(e);
+  } else {
+    activeTasks.forEach(t=>{
+      const item = document.createElement('div');
+      item.className = 'task';
+
+      const ic = document.createElement('div');
+      ic.className = 'icon';
+      ic.textContent = t.icon || 'م';
+
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+
+      const ttl = document.createElement('h4');
+      ttl.textContent = t.title;
+
+      const desc = document.createElement('p');
+      desc.textContent = t.desc || '';
+
+      const rem = document.createElement('div');
+      rem.className = 'remaining';
+      rem.textContent = daysLeft(t.deadline);
+
+      const date = document.createElement('div');
+      date.className = 'date';
+      date.textContent = formatDate(t.deadline);
+
+      meta.appendChild(ttl);
+      meta.appendChild(desc);
+      meta.appendChild(rem);
+
+      item.appendChild(ic);
+      item.appendChild(meta);
+      item.appendChild(date);
+
+      tasksWrap.appendChild(item);
+    });
+  }
+
+  card.appendChild(tasksWrap);
+  return card;
+}
+
+/* reveal */
+function setupReveal(){
+  const obs = new IntersectionObserver((entries)=>{
+    entries.forEach(en=>{
+      if(en.isIntersecting){ en.target.classList.add('in'); }
+    });
+  }, {threshold:0.08});
+
+  document.querySelectorAll('.reveal').forEach(el=>{
+    el.classList.remove('in');
+    obs.observe(el);
+  });
+}
+
+/* responsive */
+function handleResponsive(){
+  if(window.innerWidth <= 800){
+    timelineGrid.style.display='none';
+    timelineScroll.style.display='flex';
+  } else {
+    timelineGrid.style.display='grid';
+    timelineScroll.style.display='none';
+  }
+}
+window.addEventListener('resize', handleResponsive);
+
+/* loader */
+const loader = document.getElementById('loader');
+const loaderPercent = document.getElementById('loaderPercent');
+
+function startLoaderThenInit(){
+  let p = 0;
+  const t = setInterval(()=>{
+    p += Math.random() * 15;
+    if(p >= 100) p = 100;
+
+    loaderPercent.textContent = Math.floor(p) + '%';
+
+    if(p === 100){
+      clearInterval(t);
+      setTimeout(()=>{
+        loader.classList.add('hidden');
+        document.getElementById('app').removeAttribute('aria-hidden');
+        renderAll();
+      }, 420);
     }
+  }, 220);
+}
+window.addEventListener('load', startLoaderThenInit);
 
-    function buildMonthCard(month, activeTasks){
-      const card = document.createElement('article');
-      card.className = 'month-card reveal';
-      card.dataset.key = month.key;
-
-      const head = document.createElement('div'); head.className='month-head';
-      const h3 = document.createElement('h3'); h3.textContent = month.title;
-      const pb = document.createElement('div'); pb.className='progress-bar';
-      head.appendChild(h3); head.appendChild(pb);
-      card.appendChild(head);
-
-      const tasksWrap = document.createElement('div'); tasksWrap.className='tasks';
-
-      if(activeTasks.length === 0){
-        const e = document.createElement('div'); e.className='empty'; e.textContent='لا توجد مهام نشطة لهذا الشهر';
-        tasksWrap.appendChild(e);
-      } else {
-        activeTasks.forEach(t=>{
-          const item = document.createElement('div'); item.className='task';
-          const ic = document.createElement('div'); ic.className='icon'; ic.textContent = t.icon || 'م';
-          const meta = document.createElement('div'); meta.className='meta';
-          const ttl = document.createElement('h4'); ttl.textContent = t.title;
-          const desc = document.createElement('p'); desc.textContent = t.desc || '';
-          const rem = document.createElement('div'); rem.className='remaining'; rem.textContent = daysLeft(t.deadline);
-          meta.appendChild(ttl); meta.appendChild(desc); meta.appendChild(rem);
-          const date = document.createElement('div'); date.className='date'; date.textContent = formatDate(t.deadline);
-          item.appendChild(ic); item.appendChild(meta); item.appendChild(date);
-          tasksWrap.appendChild(item);
-        });
-      }
-      card.appendChild(tasksWrap);
-      return card;
-    }
-
-    /* ========== reveal animation (IntersectionObserver) ========== */
-    function setupReveal(){
-      const obs = new IntersectionObserver((entries)=>{
-        entries.forEach(en=>{
-          if(en.isIntersecting){ en.target.classList.add('in'); }
-        });
-      }, {threshold:0.08});
-      document.querySelectorAll('.reveal').forEach(el=>{ el.classList.remove('in'); obs.observe(el); });
-    }
-
-    /* ========== responsive timeline switch ========== */
-    function handleResponsive(){
-      if(window.innerWidth <= 800){
-        timelineGrid.style.display='none';
-        timelineScroll.style.display='flex';
-      } else {
-        timelineGrid.style.display='grid';
-        timelineScroll.style.display='none';
-      }
-    }
-    window.addEventListener('resize', handleResponsive);
-
-    /* ========== loader simulation then init ========== */
-    const loader = document.getElementById('loader');
-    const loaderPercent = document.getElementById('loaderPercent');
-    function startLoaderThenInit(){
-      let p = 0;
-      const t = setInterval(()=>{
-        p += Math.random()*15;
-        if(p >= 100) p = 100;
-        loaderPercent.textContent = Math.floor(p) + '%';
-        if(p === 100){
-          clearInterval(t);
-          setTimeout(()=>{ loader.classList.add('hidden'); document.getElementById('app').removeAttribute('aria-hidden'); renderAll(); }, 420);
-        }
-      }, 220);
-    }
-    window.addEventListener('load', startLoaderThenInit);
-
-    /* rerender each minute to auto-hide expired tasks */
-    setInterval(renderAll, 60*1000);
+/* تحديث تلقائي كل دقيقة لإخفاء المهام المنتهية */
+setInterval(renderAll, 60000);
   </script>
 </body>
 </html>
